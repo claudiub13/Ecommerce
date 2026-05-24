@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibrariaBelciug — Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap)" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
             --ink: #0f0e0d; --paper: #f7f4ef; --cream: #ede9e1;
             --accent: #c8511a; --muted: #8a8278; --border: #d9d4cc;
+        }
+        html, body {
+            width: 100%;
+            overflow-x: hidden;
         }
         body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
 
@@ -17,6 +21,7 @@
             background: var(--ink); padding: 0 3rem;
             display: flex; align-items: center;
             justify-content: space-between; height: 64px;
+            position: sticky; top: 0; z-index: 1000; /* nav fix sus pe toate ecranele */
         }
         .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff; }
         .brand span { color: var(--accent); font-style: italic; }
@@ -35,7 +40,7 @@
 
         .layout {
             display: grid;
-            grid-template-columns: 340px 1fr;
+            grid-template-columns: 340px minmax(0,1fr); /* prevenim overflow pe desktop */
             gap: 0; min-height: calc(100vh - 64px);
         }
 
@@ -44,10 +49,17 @@
             background: #fff;
             border-right: 1px solid var(--border);
             padding: 2rem;
-            position: sticky; top: 64px;
             height: calc(100vh - 64px);
             overflow-y: auto;
         }
+        /* sticky doar pe ecrane mari – pe mobil curge normal */
+        @media (min-width: 769px) {
+            .sidebar {
+                position: sticky;
+                top: 64px;
+            }
+        }
+
         .sidebar h2 {
             font-family: 'Playfair Display', serif;
             font-size: 1.4rem; margin-bottom: 0.25rem;
@@ -93,7 +105,7 @@
         .form-msg.error { background: #fdf2ef; border: 1px solid #f5c4b3; color: #c8511a; }
 
         /* MAIN */
-        .main { padding: 2rem; }
+        .main { padding: 2rem; min-width: 0; } /* min-width:0 ca să nu forțeze grid-ul să se lărgească */
         .main-header {
             display: flex; align-items: center;
             justify-content: space-between; margin-bottom: 1.5rem;
@@ -112,7 +124,8 @@
         .table-wrap {
             background: #fff;
             border: 1px solid var(--border);
-            border-radius: 10px; overflow: hidden;
+            border-radius: 10px;
+            overflow: hidden;
         }
         table { width: 100%; border-collapse: collapse; }
         thead { background: var(--cream); }
@@ -168,13 +181,15 @@
             text-align: center; padding: 3rem;
             color: var(--muted); font-style: italic;
         }
+
+        /* RESPONSIVE */
         @media (max-width: 768px) {
             nav {
                 padding: 0 1rem;
             }
 
             .brand {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
 
             .layout {
@@ -187,6 +202,7 @@
                 height: auto;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
+                padding: 1.5rem 1rem;
             }
 
             .main {
@@ -194,10 +210,19 @@
             }
 
             .main-header h2 {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
+            }
+
+            .row2 {
+                grid-template-columns: 1fr; /* câmpurile din formular pe o singură coloană pe mobil */
+            }
+
+            .table-wrap {
+                overflow-x: auto; /* scroll orizontal doar pentru tabel pe ecrane mici */
             }
 
             table {
+                min-width: 600px; /* să nu se înghesuie coloanele, se poate face scroll */
                 font-size: 0.8rem;
             }
 
