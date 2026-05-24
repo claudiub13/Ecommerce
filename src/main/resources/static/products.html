@@ -385,16 +385,24 @@
     const COLORS = ['#8B4513','#2C5F2E','#1B3A6B','#6B2C5E','#4A4A4A','#8B6914','#2C4A6B','#6B3A2C','#8B3A3A','#2C6B5F'];
     let allProducts = [];
     const token = localStorage.getItem('token');
+    // === LOGICA PENTRU MENIU (NAVBAR) ===
     const username = localStorage.getItem('username');
-
     if (username) {
-        document.getElementById('nav-user').innerHTML = `<a href="account.html" style="color:var(--muted); text-decoration:none; font-weight:500;">Salut, ${username}</a>`;
+        // Afișăm butonul de cont și îi punem numele
+        const navUserBtn = document.getElementById('nav-user');
+        navUserBtn.style.display = 'inline-block';
+        navUserBtn.textContent = '👤 ' + username; // Va duce automat spre account.html
 
+        // Schimbăm butonul de Login în Deconectare
         const authBtn = document.getElementById('auth-btn');
         authBtn.textContent = 'Ieși';
-        authBtn.onclick = (e) => { e.preventDefault(); localStorage.clear(); location.reload(); };
+        authBtn.onclick = (e) => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = 'products.html';
+        };
     }
-
+    // ====================================
     function getColor(id) { return COLORS[id % COLORS.length]; }
 
     function showToast(msg) {
