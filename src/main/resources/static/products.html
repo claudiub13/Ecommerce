@@ -275,7 +275,7 @@
 
     async function loadProducts() {
         try {
-            const res = await fetch('http://localhost:8080/api/products');
+            const res = await fetch('/api/products');
             allProducts = await res.json();
             document.getElementById('product-count').textContent = allProducts.length;
             renderProducts(allProducts);
@@ -368,7 +368,7 @@
     async function addToCart(productId) {
         if (!token) { showToast('Trebuie să fii logat!'); return; }
         try {
-            const res = await fetch(`http://localhost:8080/api/cart/add/${productId}?quantity=1`, {
+            const res = await fetch(`/api/cart/add/${productId}?quantity=1`, {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
             });
             if (!res.ok) throw new Error();
@@ -380,7 +380,7 @@
     async function updateCartCount() {
         if (!token) return;
         try {
-            const res = await fetch('http://localhost:8080/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
+            const res = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
             const cart = await res.json();
             const count = (cart.items || []).reduce((s, i) => s + i.quantity, 0);
             document.getElementById('cart-count').textContent = count;

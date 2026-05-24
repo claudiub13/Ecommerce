@@ -213,7 +213,7 @@
 
     async function loadCart() {
         try {
-            const res = await fetch('http://localhost:8080/api/cart', {
+            const res = await fetch('/api/cart', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
             const cart = await res.json();
@@ -315,7 +315,7 @@
         }
 
         try {
-            const res = await fetch('http://localhost:8080/api/orders/checkout', {
+            const res = await fetch('/api/orders/checkout', {
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token }
             });
