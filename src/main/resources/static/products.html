@@ -20,16 +20,30 @@
         body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); }
 
         nav {
-            position: sticky; top: 0; z-index: 100;
+            position: sticky; top: 0; z-index: 1000;
             background: rgba(247,244,239,0.92);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--border);
             padding: 0 3rem;
             display: flex; align-items: center;
             justify-content: space-between; height: 64px;
+            width: 100%;
         }
-        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; letter-spacing: -0.02em; }
-        .brand span { color: var(--accent); font-style: italic; }
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--ink);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: baseline;
+        }
+        .brand span {
+            color: var(--accent);
+            font-style: italic;
+            margin-left: 2px;
+        }
         .nav-right { display: flex; align-items: center; gap: 1rem; }
         .nav-user { font-size: 0.85rem; color: var(--muted); }
         .nav-btn {
@@ -335,6 +349,7 @@
 
 <nav>
     <a href="products.html" class="brand">Libraria Belciug<span>.</span></a>
+
     <div class="nav-right">
         <a href="products.html" class="nav-btn btn-outline">Cărți</a>
 
