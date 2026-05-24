@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folio — Cărți</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --ink: #0f0e0d; --paper: #f7f4ef; --cream: #ede9e1;
+            --accent: #c8511a; --muted: #8a8278; --border: #d9d4cc;
+        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); }
+
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(247,244,239,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 3rem;
+            display: flex; align-items: center;
+            justify-content: space-between; height: 64px;
+        }
+        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; letter-spacing: -0.02em; }
+        .brand span { color: var(--accent); font-style: italic; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-user { font-size: 0.85rem; color: var(--muted); }
+        .nav-btn {
+            padding: 0.5rem 1.1rem; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--ink); }
+        .btn-dark { background: var(--ink); color: #fff; border: none; position: relative; display: inline-flex; align-items: center; gap: 0.4rem; }
+        .btn-dark:hover { background: #2a2927; }
+        .cart-count {
+            background: var(--accent); color: #fff;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 0.65rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .hero {
+            padding: 4rem 3rem 3rem;
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: flex-end;
+            justify-content: space-between; gap: 2rem;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem; letter-spacing: -0.03em;
+            line-height: 1.1; max-width: 500px;
+        }
+        .hero h1 em { font-style: italic; color: var(--accent); }
+        .hero-meta { color: var(--muted); font-size: 0.85rem; }
+        #product-count { font-weight: 500; color: var(--ink); }
+
+        .search-bar { padding: 1.5rem 3rem; border-bottom: 1px solid var(--border); }
+        .search-wrap { display: flex; gap: 0.75rem; max-width: 500px; }
+        .search-wrap input {
+            flex: 1; padding: 0.75rem 1rem;
+            border: 1px solid var(--border); border-radius: 6px;
+            background: #fff; font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem; outline: none; color: var(--ink);
+            transition: border-color 0.2s;
+        }
+        .search-wrap input:focus { border-color: var(--ink); }
+
+        .products-section { padding: 2rem 3rem; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: #fff; border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(15,14,13,0.1); }
+
+        .card-cover {
+            height: 200px;
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .card-cover img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+        }
+        .card-cover-fallback {
+            width: 110px; height: 160px;
+            border-radius: 3px 8px 8px 3px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem; text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.75rem; color: rgba(255,255,255,0.9);
+            line-height: 1.4;
+            box-shadow: 4px 4px 20px rgba(0,0,0,0.2), inset -3px 0 8px rgba(0,0,0,0.15);
+        }
+
+        .card-body { padding: 1rem 1.1rem 1.1rem; }
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem;
+            letter-spacing: -0.01em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .card-desc {
+            font-size: 0.78rem; color: var(--muted); margin-bottom: 0.75rem;
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5;
+        }
+        .card-footer { display: flex; align-items: center; justify-content: space-between; }
+        .price { font-size: 1.1rem; font-weight: 500; }
+        .add-btn {
+            padding: 0.45rem 0.9rem; background: var(--ink); color: #fff;
+            border: none; border-radius: 5px; font-size: 0.8rem;
+            cursor: pointer; font-family: 'DM Sans', sans-serif;
+            transition: background 0.15s;
+        }
+        .add-btn:hover { background: var(--accent); }
+        .stock-badge { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.5rem; }
+        .stock-badge.low { color: var(--accent); }
+
+        .loading { grid-column: 1/-1; text-align: center; padding: 4rem; color: var(--muted); font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.1rem; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(15,14,13,0.5);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 2rem; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal {
+            background: #fff; border-radius: 14px;
+            max-width: 560px; width: 100%;
+            display: grid; grid-template-columns: 180px 1fr;
+            overflow: hidden;
+            transform: translateY(20px);
+            transition: transform 0.2s;
+            max-height: 90vh;
+        }
+        .modal-overlay.open .modal { transform: translateY(0); }
+        .modal-img {
+            background: var(--cream);
+            display: flex; align-items: center; justify-content: center;
+            padding: 2rem;
+        }
+        .modal-img img {
+            width: 120px; height: 180px; object-fit: cover;
+            border-radius: 3px 8px 8px 3px;
+            box-shadow: 4px 4px 20px rgba(0,0,0,0.2);
+        }
+        .modal-img-fallback {
+            width: 120px; height: 180px;
+            border-radius: 3px 8px 8px 3px;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1rem; text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.8rem; color: rgba(255,255,255,0.9); line-height: 1.4;
+            box-shadow: 4px 4px 20px rgba(0,0,0,0.2);
+        }
+        .modal-body { padding: 2rem; overflow-y: auto; }
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; font-weight: 700;
+            letter-spacing: -0.02em; margin-bottom: 0.5rem;
+        }
+        .modal-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+        .modal-price { font-size: 1.5rem; font-weight: 500; margin-bottom: 0.4rem; }
+        .modal-stock { font-size: 0.8rem; color: var(--muted); margin-bottom: 1.25rem; }
+        .modal-stock.low { color: var(--accent); }
+        .modal-add {
+            width: 100%; padding: 0.85rem;
+            background: var(--ink); color: #fff; border: none;
+            border-radius: 8px; font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .modal-add:hover { background: var(--accent); }
+        .modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: rgba(255,255,255,0.9); border: 1px solid var(--border);
+            width: 32px; height: 32px; border-radius: 50%;
+            cursor: pointer; font-size: 1rem; display: flex;
+            align-items: center; justify-content: center;
+        }
+
+        .toast {
+            position: fixed; bottom: 2rem; right: 2rem;
+            background: var(--ink); color: #fff;
+            padding: 0.75rem 1.25rem; border-radius: 8px;
+            font-size: 0.85rem; transform: translateY(100px);
+            opacity: 0; transition: all 0.3s; z-index: 999;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="brand">Folio<span>.</span></div>
+    <div class="nav-right">
+        <span class="nav-user" id="nav-user"></span>
+        <a href="cart.html" class="nav-btn btn-dark">
+            🛒 Coș <span class="cart-count" id="cart-count">0</span>
+        </a>
+        <a href="login.html" class="nav-btn btn-outline" id="auth-btn">Login</a>
+        <a href="admin.html" class="nav-btn btn-outline">Admin</a>
+    </div>
+</nav>
+
+<div class="hero">
+    <h1>Cărțile care<br><em>schimbă</em> lumi</h1>
+    <div class="hero-meta"><span id="product-count">0</span> titluri disponibile</div>
+</div>
+
+<div class="search-bar">
+    <div class="search-wrap">
+        <input type="text" id="search" placeholder="Caută o carte..." oninput="filterProducts()">
+    </div>
+</div>
+
+<div class="products-section">
+    <div class="grid" id="grid">
+        <div class="loading">Se încarcă cărțile...</div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+        <div class="modal-img" id="modal-img"></div>
+        <div class="modal-body">
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-desc" id="modal-desc"></div>
+            <div class="modal-price" id="modal-price"></div>
+            <div class="modal-stock" id="modal-stock"></div>
+            <button class="modal-add" id="modal-add-btn">+ Adaugă în coș</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const COLORS = ['#8B4513','#2C5F2E','#1B3A6B','#6B2C5E','#4A4A4A','#8B6914','#2C4A6B','#6B3A2C','#8B3A3A','#2C6B5F'];
+    let allProducts = [];
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+
+    if (username) {
+        document.getElementById('nav-user').textContent = 'Salut, ' + username;
+        const authBtn = document.getElementById('auth-btn');
+        authBtn.textContent = 'Ieși';
+        authBtn.onclick = (e) => { e.preventDefault(); localStorage.clear(); location.reload(); };
+    }
+
+    function getColor(id) { return COLORS[id % COLORS.length]; }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg; t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    async function loadProducts() {
+        try {
+            const res = await fetch('http://localhost:8080/api/products');
+            allProducts = await res.json();
+            document.getElementById('product-count').textContent = allProducts.length;
+            renderProducts(allProducts);
+        } catch(e) {
+            document.getElementById('grid').innerHTML = '<div class="loading">Eroare la încărcare.</div>';
+        }
+    }
+
+    function coverHTML(p, size = 'card') {
+        const w = size === 'modal' ? '120px' : '110px';
+        const h = size === 'modal' ? '180px' : '160px';
+        if (p.imageUrl) {
+            if (size === 'modal') {
+                return `<img src="${p.imageUrl}" alt="${p.name}" style="width:${w};height:${h};object-fit:cover;border-radius:3px 8px 8px 3px;box-shadow:4px 4px 20px rgba(0,0,0,0.2)" onerror="this.replaceWith(fallbackEl(${p.id},'${p.name}','${w}','${h}'))">`;
+            }
+            return `<img src="${p.imageUrl}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML=fallbackCard(${p.id},'${p.name.replace(/'/g,"\\'")}')">`;
+        }
+        const color = getColor(p.id);
+        return `<div style="width:${w};height:${h};border-radius:3px 8px 8px 3px;background:${color};display:flex;align-items:center;justify-content:center;padding:0.75rem;text-align:center;font-family:'Playfair Display',serif;font-size:0.72rem;color:rgba(255,255,255,0.9);line-height:1.4;box-shadow:4px 4px 20px rgba(0,0,0,0.2)">${p.name}</div>`;
+    }
+
+    function fallbackCard(id, name) {
+        const color = getColor(id);
+        return `<div style="width:110px;height:160px;border-radius:3px 8px 8px 3px;background:${color};display:flex;align-items:center;justify-content:center;padding:0.75rem;text-align:center;font-family:'Playfair Display',serif;font-size:0.72rem;color:rgba(255,255,255,0.9);line-height:1.4;box-shadow:4px 4px 20px rgba(0,0,0,0.2)">${name}</div>`;
+    }
+
+    function renderProducts(products) {
+        const grid = document.getElementById('grid');
+        if (!products.length) { grid.innerHTML = '<div class="loading">Nicio carte găsită.</div>'; return; }
+        grid.innerHTML = products.map(p => `
+    <div class="card" onclick="openModal(${p.id})">
+      <div class="card-cover" style="${!p.imageUrl ? 'background:'+getColor(p.id)+'18' : ''}">
+        ${coverHTML(p, 'card')}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${p.name}</div>
+        <div class="card-desc">${p.description || 'Fără descriere'}</div>
+        <div class="stock-badge ${p.stock < 5 ? 'low' : ''}">${p.stock > 0 ? p.stock + ' în stoc' : 'Stoc epuizat'}</div>
+        <div class="card-footer">
+          <span class="price">${p.price.toFixed(2)} RON</span>
+          <button class="add-btn" onclick="event.stopPropagation();addToCart(${p.id});" ${p.stock === 0 ? 'disabled style="opacity:0.4"' : ''}>+ Adaugă</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+    }
+
+    function filterProducts() {
+        const q = document.getElementById('search').value.toLowerCase();
+        renderProducts(allProducts.filter(p => p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q)));
+    }
+
+    function openModal(id) {
+        const p = allProducts.find(x => x.id === id);
+        if (!p) return;
+
+        const imgContainer = document.getElementById('modal-img');
+        imgContainer.innerHTML = coverHTML(p, 'modal');
+
+        document.getElementById('modal-title').textContent = p.name;
+        document.getElementById('modal-desc').textContent = p.description || 'Nicio descriere disponibilă.';
+        document.getElementById('modal-price').textContent = p.price.toFixed(2) + ' RON';
+
+        const stockEl = document.getElementById('modal-stock');
+        stockEl.textContent = p.stock > 0 ? p.stock + ' exemplare în stoc' : 'Stoc epuizat';
+        stockEl.className = 'modal-stock' + (p.stock < 5 ? ' low' : '');
+
+        const addBtn = document.getElementById('modal-add-btn');
+        addBtn.onclick = () => { addToCart(p.id); };
+        addBtn.disabled = p.stock === 0;
+
+        document.getElementById('modal-overlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+        if (e.target === document.getElementById('modal-overlay')) {
+            document.getElementById('modal-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.getElementById('modal-overlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+
+    async function addToCart(productId) {
+        if (!token) { showToast('Trebuie să fii logat!'); return; }
+        try {
+            const res = await fetch(`http://localhost:8080/api/cart/add/${productId}?quantity=1`, {
+                method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error();
+            showToast('Carte adăugată în coș ✓');
+            updateCartCount();
+        } catch(e) { showToast('Eroare la adăugare'); }
+    }
+
+    async function updateCartCount() {
+        if (!token) return;
+        try {
+            const res = await fetch('http://localhost:8080/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
+            const cart = await res.json();
+            const count = (cart.items || []).reduce((s, i) => s + i.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+        } catch(e) {}
+    }
+
+    loadProducts();
+    updateCartCount();
+</script>
+</body>
+</html>

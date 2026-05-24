@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folio — Coșul meu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --ink: #0f0e0d; --paper: #f7f4ef; --cream: #ede9e1;
+            --accent: #c8511a; --muted: #8a8278; --border: #d9d4cc;
+        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+        nav {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(247,244,239,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 3rem;
+            display: flex; align-items: center;
+            justify-content: space-between; height: 64px;
+        }
+        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; letter-spacing: -0.02em; text-decoration: none; color: var(--ink); }
+        .brand span { color: var(--accent); font-style: italic; }
+
+        .page {
+            max-width: 1000px; margin: 0 auto;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 3rem; align-items: start;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem; letter-spacing: -0.03em;
+            margin-bottom: 0.25rem;
+        }
+        .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+
+        /* ITEMS */
+        .cart-items { display: flex; flex-direction: column; gap: 1rem; }
+
+        .item {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            display: grid;
+            grid-template-columns: 70px 1fr auto;
+            gap: 1rem; align-items: center;
+            transition: opacity 0.2s;
+        }
+
+        .item-cover {
+            width: 70px; height: 100px;
+            border-radius: 3px 6px 6px 3px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.6rem; color: rgba(255,255,255,0.8);
+            text-align: center; padding: 0.5rem;
+            line-height: 1.3;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.15);
+        }
+
+        .item-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1rem; font-weight: 700;
+            margin-bottom: 0.2rem; letter-spacing: -0.01em;
+        }
+        .item-price { font-size: 0.85rem; color: var(--muted); }
+
+        .item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.75rem; }
+        .item-total { font-size: 1.1rem; font-weight: 500; }
+
+        .qty-ctrl { display: flex; align-items: center; gap: 0.5rem; }
+        .qty-btn {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: 1px solid var(--border); background: transparent;
+            cursor: pointer; font-size: 1rem; font-weight: 300;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; color: var(--ink);
+        }
+        .qty-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+        .qty-val { font-size: 0.9rem; font-weight: 500; min-width: 20px; text-align: center; }
+
+        .remove-btn {
+            background: none; border: none; cursor: pointer;
+            color: var(--muted); font-size: 0.78rem;
+            font-family: 'DM Sans', sans-serif;
+            text-decoration: underline; padding: 0;
+            transition: color 0.15s;
+        }
+        .remove-btn:hover { color: var(--accent); }
+
+        .empty {
+            text-align: center; padding: 5rem 2rem;
+            color: var(--muted);
+        }
+        .empty p:first-child {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem; color: var(--ink); margin-bottom: 0.5rem;
+        }
+        .empty a {
+            display: inline-block; margin-top: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--ink); color: #fff;
+            text-decoration: none; border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* SUMMARY */
+        .summary {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: sticky; top: 84px;
+        }
+        .summary h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem; margin-bottom: 1.25rem;
+        }
+        .summary-row {
+            display: flex; justify-content: space-between;
+            font-size: 0.85rem; color: var(--muted);
+            margin-bottom: 0.6rem;
+        }
+        .summary-row.total {
+            font-size: 1rem; color: var(--ink);
+            font-weight: 500; padding-top: 0.75rem;
+            border-top: 1px solid var(--border); margin-top: 0.5rem;
+        }
+        .checkout-btn {
+            width: 100%; margin-top: 1.25rem;
+            padding: 0.9rem;
+            background: var(--ink); color: #fff;
+            border: none; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem; font-weight: 500;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .checkout-btn:hover { background: var(--accent); }
+        .checkout-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .back-link {
+            display: block; text-align: center; margin-top: 1rem;
+            color: var(--muted); font-size: 0.82rem;
+            text-decoration: none;
+        }
+        .back-link:hover { color: var(--ink); }
+
+        .success-msg {
+            background: #f0f7f0; border: 1px solid #a8d5a8;
+            color: #2d6a2d; padding: 1rem; border-radius: 8px;
+            font-size: 0.85rem; margin-top: 1rem; display: none;
+            text-align: center;
+        }
+
+        .COLORS { display:none; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="products.html" class="brand">Folio<span>.</span></a>
+</nav>
+
+<div class="page">
+    <div>
+        <h1>Coșul meu</h1>
+        <p class="subtitle" id="cart-subtitle">Se încarcă...</p>
+        <div class="cart-items" id="cart-items"></div>
+    </div>
+
+    <div class="summary">
+        <h2>Sumar comandă</h2>
+        <div class="summary-row"><span>Produse</span><span id="s-count">—</span></div>
+        <div class="summary-row"><span>Transport</span><span>Gratuit</span></div>
+        <div class="summary-row total"><span>Total</span><span id="s-total">—</span></div>
+        <button class="checkout-btn" id="checkout-btn" onclick="checkout()" disabled>
+            Finalizează comanda
+        </button>
+        <div class="success-msg" id="success-msg">
+            ✓ Comandă plasată cu succes!<br>
+            <small>Coșul a fost golit.</small>
+        </div>
+        <a href="products.html" class="back-link">← Continuă cumpărăturile</a>
+    </div>
+</div>
+
+<script>
+    const COLORS = ['#8B4513','#2C5F2E','#1B3A6B','#6B2C5E','#4A4A4A','#8B6914','#2C4A6B','#6B3A2C','#8B3A3A','#2C6B5F'];
+    const token = localStorage.getItem('token');
+
+    if (!token) window.location.href = 'login.html';
+
+    function getColor(id) { return COLORS[id % COLORS.length]; }
+
+    async function loadCart() {
+        try {
+            const res = await fetch('http://localhost:8080/api/cart', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error();
+            const cart = await res.json();
+            renderCart(cart);
+        } catch(e) {
+            document.getElementById('cart-subtitle').textContent = 'Eroare la încărcare.';
+        }
+    }
+
+    function renderCart(cart) {
+        const items = cart.items || [];
+        const container = document.getElementById('cart-items');
+        const subtitle = document.getElementById('cart-subtitle');
+
+        if (!items.length) {
+            subtitle.textContent = 'Coșul tău e gol';
+            container.innerHTML = `
+      <div class="empty">
+        <p>Coșul tău e gol</p>
+        <p>Descoperă cărțile noastre și adaugă-le aici</p>
+        <a href="products.html">Explorează cărți</a>
+      </div>`;
+            document.getElementById('checkout-btn').disabled = true;
+            document.getElementById('s-count').textContent = '0 produse';
+            document.getElementById('s-total').textContent = '0.00 RON';
+            return;
+        }
+
+        subtitle.textContent = `${items.length} ${items.length === 1 ? 'carte' : 'cărți'} în coș`;
+
+        container.innerHTML = items.map(item => `
+    <div class="item" id="item-${item.id}">
+      <div class="item-cover" style="background:${getColor(item.product.id)}">
+        ${item.product.name}
+      </div>
+      <div>
+        <div class="item-name">${item.product.name}</div>
+        <div class="item-price">${item.product.price.toFixed(2)} RON / buc</div>
+      </div>
+      <div class="item-right">
+        <div class="item-total">${(item.product.price * item.quantity).toFixed(2)} RON</div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="decreaseItem(${item.id})">−</button>
+          <span class="qty-val">${item.quantity}</span>
+          <button class="qty-btn" onclick="addOne(${item.product.id})">+</button>
+        </div>
+        <button class="remove-btn" onclick="removeItem(${item.id})">Elimină</button>
+      </div>
+    </div>
+  `).join('');
+
+        const total = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
+        const count = items.reduce((s, i) => s + i.quantity, 0);
+        document.getElementById('s-count').textContent = count + ' produse';
+        document.getElementById('s-total').textContent = total.toFixed(2) + ' RON';
+        document.getElementById('checkout-btn').disabled = false;
+    }
+
+    async function removeItem(itemId) {
+        try {
+            await fetch(`http://localhost:8080/api/cart/remove/${itemId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            loadCart();
+        } catch(e) {}
+    }
+
+    async function decreaseItem(itemId) {
+        try {
+            await fetch(`http://localhost:8080/api/cart/decrease/${itemId}`, {
+                method: 'PUT',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            loadCart();
+        } catch(e) {}
+    }
+
+    async function addOne(productId) {
+        try {
+            await fetch(`http://localhost:8080/api/cart/add/${productId}?quantity=1`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            loadCart();
+        } catch(e) {}
+    }
+
+    async function checkout() {
+        window.location.href = 'checkout.html';
+    }
+
+    loadCart();
+</script>
+</body>
+</html>

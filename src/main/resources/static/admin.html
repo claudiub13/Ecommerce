@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folio — Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --ink: #0f0e0d; --paper: #f7f4ef; --cream: #ede9e1;
+            --accent: #c8511a; --muted: #8a8278; --border: #d9d4cc;
+        }
+        body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+        nav {
+            background: var(--ink); padding: 0 3rem;
+            display: flex; align-items: center;
+            justify-content: space-between; height: 64px;
+        }
+        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff; }
+        .brand span { color: var(--accent); font-style: italic; }
+        .nav-badge {
+            background: var(--accent); color: #fff;
+            padding: 0.25rem 0.75rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-link {
+            color: rgba(255,255,255,0.6); font-size: 0.85rem;
+            text-decoration: none; transition: color 0.15s;
+        }
+        .nav-link:hover { color: #fff; }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 0; min-height: calc(100vh - 64px);
+        }
+
+        /* SIDEBAR FORM */
+        .sidebar {
+            background: #fff;
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            position: sticky; top: 64px;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; margin-bottom: 0.25rem;
+        }
+        .sidebar p { color: var(--muted); font-size: 0.82rem; margin-bottom: 1.75rem; }
+
+        .field { margin-bottom: 1rem; }
+        label {
+            display: block; font-size: 0.72rem; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--muted); margin-bottom: 0.4rem;
+        }
+        input, textarea {
+            width: 100%; padding: 0.75rem 0.9rem;
+            border: 1px solid var(--border); border-radius: 6px;
+            background: var(--paper); font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem; color: var(--ink);
+            transition: border-color 0.2s, background 0.2s; outline: none;
+        }
+        input:focus, textarea:focus {
+            border-color: var(--ink); background: #fff;
+            box-shadow: 0 0 0 3px rgba(15,14,13,0.05);
+        }
+        textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+        .submit-btn {
+            width: 100%; padding: 0.85rem;
+            background: var(--ink); color: #fff;
+            border: none; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem; font-weight: 500;
+            cursor: pointer; margin-top: 0.5rem;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover { background: var(--accent); }
+
+        .form-msg {
+            padding: 0.65rem 0.9rem; border-radius: 6px;
+            font-size: 0.82rem; margin-top: 0.75rem; display: none;
+        }
+        .form-msg.success { background: #f0f7f0; border: 1px solid #a8d5a8; color: #2d6a2d; }
+        .form-msg.error { background: #fdf2ef; border: 1px solid #f5c4b3; color: #c8511a; }
+
+        /* MAIN */
+        .main { padding: 2rem; }
+        .main-header {
+            display: flex; align-items: center;
+            justify-content: space-between; margin-bottom: 1.5rem;
+        }
+        .main-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+        }
+        .count-badge {
+            background: var(--cream); color: var(--muted);
+            padding: 0.3rem 0.75rem; border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        /* TABLE */
+        .table-wrap {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px; overflow: hidden;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: var(--cream); }
+        th {
+            text-align: left; padding: 0.75rem 1rem;
+            font-size: 0.72rem; font-weight: 500;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--muted); white-space: nowrap;
+        }
+        td {
+            padding: 0.9rem 1rem; font-size: 0.87rem;
+            border-top: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        tr:hover td { background: var(--paper); }
+
+        .td-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700; font-size: 0.92rem;
+        }
+        .td-desc {
+            color: var(--muted); max-width: 200px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .td-price { font-weight: 500; white-space: nowrap; }
+        .td-stock-low { color: var(--accent); font-weight: 500; }
+
+        .book-chip {
+            width: 32px; height: 44px;
+            border-radius: 2px 5px 5px 2px;
+            display: inline-block;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.15);
+        }
+
+        .del-btn {
+            padding: 0.35rem 0.75rem;
+            background: transparent; color: var(--muted);
+            border: 1px solid var(--border); border-radius: 5px;
+            font-size: 0.78rem; cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.15s;
+        }
+        .del-btn:hover { background: #fdf2ef; border-color: var(--accent); color: var(--accent); }
+
+        .empty-table {
+            text-align: center; padding: 4rem;
+            color: var(--muted);
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        .loading-row td {
+            text-align: center; padding: 3rem;
+            color: var(--muted); font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="brand">Folio<span>.</span></div>
+    <div class="nav-right">
+        <span class="nav-badge">Admin Panel</span>
+        <a href="products.html" class="nav-link">← Magazin</a>
+    </div>
+</nav>
+
+<div class="layout">
+
+    <!-- SIDEBAR: ADD PRODUCT -->
+    <div class="sidebar">
+        <h2>Adaugă carte</h2>
+        <p>Completează formularul pentru a adăuga o carte în catalog.</p>
+
+        <div class="field">
+            <label>Titlu carte *</label>
+            <input type="text" id="name" placeholder="ex: Crimă și pedeapsă">
+        </div>
+        <div class="field">
+            <label>Descriere</label>
+            <textarea id="description" placeholder="Scurtă descriere a cărții..."></textarea>
+        </div>
+        <div class="row2">
+            <div class="field">
+                <label>Preț (RON) *</label>
+                <input type="number" id="price" placeholder="49.99" step="0.01" min="0">
+            </div>
+            <div class="field">
+                <label>Stoc *</label>
+                <input type="number" id="stock" placeholder="10" min="0">
+            </div>
+        </div>
+        <div class="field">
+            <label>URL imagine (opțional)</label>
+            <input type="text" id="imageUrl" placeholder="https://...">
+        </div>
+
+        <button class="submit-btn" onclick="addProduct()">+ Adaugă în catalog</button>
+
+        <div class="form-msg success" id="form-success">Carte adăugată cu succes!</div>
+        <div class="form-msg error" id="form-error"></div>
+    </div>
+
+    <!-- MAIN: PRODUCT LIST -->
+    <div class="main">
+        <div class="main-header">
+            <h2>Catalog cărți</h2>
+            <span class="count-badge" id="count-badge">0 cărți</span>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Titlu</th>
+                    <th>Descriere</th>
+                    <th>Preț</th>
+                    <th>Stoc</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                <tr class="loading-row"><td colspan="6">Se încarcă...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const COLORS = ['#8B4513','#2C5F2E','#1B3A6B','#6B2C5E','#4A4A4A','#8B6914','#2C4A6B','#6B3A2C','#8B3A3A','#2C6B5F'];
+    const token = localStorage.getItem('token');
+
+    function getColor(id) { return COLORS[id % COLORS.length]; }
+
+    async function loadProducts() {
+        try {
+            const res = await fetch('http://localhost:8080/api/products');
+            const products = await res.json();
+            document.getElementById('count-badge').textContent = products.length + ' cărți';
+            const tbody = document.getElementById('tbody');
+
+            if (!products.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:3rem;color:var(--muted);font-style:italic">Nicio carte în catalog încă.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = products.map(p => `
+      <tr id="row-${p.id}">
+        <td>
+          <div class="book-chip" style="background:${getColor(p.id)}"></div>
+        </td>
+        <td class="td-name">${p.name}</td>
+        <td class="td-desc">${p.description || '—'}</td>
+        <td class="td-price">${p.price.toFixed(2)} RON</td>
+        <td class="${p.stock < 5 ? 'td-stock-low' : ''}">${p.stock}</td>
+        <td>
+          <button class="del-btn" onclick="deleteProduct(${p.id})">Șterge</button>
+        </td>
+      </tr>
+    `).join('');
+        } catch(e) {
+            document.getElementById('tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--accent)">Eroare la încărcare.</td></tr>';
+        }
+    }
+
+    async function addProduct() {
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const price = parseFloat(document.getElementById('price').value);
+        const stock = parseInt(document.getElementById('stock').value);
+        const imageUrl = document.getElementById('imageUrl').value.trim();
+
+        const successEl = document.getElementById('form-success');
+        const errorEl = document.getElementById('form-error');
+        successEl.style.display = 'none';
+        errorEl.style.display = 'none';
+
+        if (!name || isNaN(price) || isNaN(stock)) {
+            errorEl.textContent = 'Completează titlul, prețul și stocul.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:8080/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? 'Bearer ' + token : ''
+                },
+                body: JSON.stringify({ name, description, price, stock, imageUrl: imageUrl || null })
+            });
+            if (!res.ok) throw new Error();
+
+            successEl.style.display = 'block';
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('stock').value = '';
+            document.getElementById('imageUrl').value = '';
+            setTimeout(() => successEl.style.display = 'none', 3000);
+            loadProducts();
+        } catch(e) {
+            errorEl.textContent = 'Eroare la adăugare. Verifică că ești logat.';
+            errorEl.style.display = 'block';
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Ștergi această carte din catalog?')) return;
+        try {
+            await fetch(`http://localhost:8080/api/products/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': token ? 'Bearer ' + token : '' }
+            });
+            document.getElementById('row-' + id).remove();
+            const count = document.querySelectorAll('#tbody tr').length;
+            document.getElementById('count-badge').textContent = count + ' cărți';
+        } catch(e) {
+            alert('Eroare la ștergere.');
+        }
+    }
+
+    loadProducts();
+</script>
+</body>
+</html>
