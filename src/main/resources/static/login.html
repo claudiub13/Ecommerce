@@ -335,6 +335,8 @@
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
         const errorEl = document.getElementById('error');
+        const btn = document.querySelector('.btn');
+
         errorEl.style.display = 'none';
 
         if (!username || !password) {
@@ -344,6 +346,10 @@
         }
 
         try {
+            // Schimbăm textul butonului ca să arate că lucrează
+            btn.textContent = 'Se autentifică...';
+            btn.disabled = true;
+
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -352,12 +358,44 @@
 
             if (!res.ok) throw new Error('Credențiale incorecte');
             const data = await res.json();
+
+            // 1. Salvăm token-ul
             localStorage.setItem('token', data.token);
             localStorage.setItem('username', data.username);
-            window.location.href = 'products.html';
+
+            // 2. TRANSFERUL COȘULUI (GUEST -> BACKEND)
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+
+            if (guestCart.length > 0) {
+                btn.textContent = 'Se sincronizează coșul...';
+
+                // Trimitem fiecare produs la backend folosind token-ul nou primit
+                for (let item of guestCart) {
+                    try {
+                        await fetch(`/api/cart/add/${item.productId}?quantity=${item.quantity}`, {
+                            method: 'POST',
+                            headers: { 'Authorization': 'Bearer ' + data.token }
+                        });
+                    } catch (e) {
+                        console.error('Eroare la transfer produs:', item.productId);
+                    }
+                }
+
+                // Ștergem coșul temporar după ce am terminat
+                localStorage.removeItem('guestCart');
+
+                // Redirecționăm utilizatorul către coș ca să finalizeze comanda
+                window.location.href = 'cart.html';
+            } else {
+                // Dacă nu avea nimic în coșul de vizitator, îl trimitem la cărți
+                window.location.href = 'products.html';
+            }
+
         } catch (e) {
             errorEl.textContent = e.message;
             errorEl.style.display = 'block';
+            btn.textContent = 'Intră în cont';
+            btn.disabled = false;
         }
     }
 
