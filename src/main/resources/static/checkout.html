@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibrariaBelciug — Checkout</title>
-    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -13,35 +13,54 @@
             --green: #2d6a2d; --green-bg: #f0f7f0; --green-border: #a8d5a8;
         }
         body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
-        nav { background: var(--ink); padding: 0 3rem; display: flex; align-items: center; justify-content: space-between; height: 64px;
-            width: 100%; /* Adăugat pentru a asigura lățimea completă pe toate ecranele */
-            position: sticky; /* Adăugat pentru a rămâne în partea de sus */
-            top: 0;
-            z-index: 1000;
-        }
-        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff; text-decoration: none; }
-        .brand span { color: var(--accent); font-style: italic; }
 
-        /* Aici sunt modificările esențiale pentru layout-ul responsiv */
+        /* NAVBAR CSS MODIFICAT PENTRU A FI IDENTIC CU RESTUL PAGINILOR */
+        nav {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(247,244,239,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 3rem;
+            display: flex; align-items: center;
+            justify-content: space-between; height: 64px;
+            width: 100%;
+        }
+        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+        .brand span { color: var(--accent); font-style: italic; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-user { font-size: 0.85rem; color: var(--muted); }
+        .nav-btn {
+            padding: 0.5rem 1.1rem; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--ink); }
+        .btn-dark { background: var(--ink); color: #fff; border: none; position: relative; display: inline-flex; align-items: center; gap: 0.4rem; }
+        .btn-dark:hover { background: #2a2927; }
+        .cart-count {
+            background: var(--accent); color: #fff;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 0.65rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+
         .page {
             max-width: 1000px;
             margin: 0 auto;
             padding: 3rem 2rem;
             display: grid;
-            /* Pe mobil, va fi o singură coloană */
             grid-template-columns: 1fr;
             gap: 3rem;
             align-items: start;
         }
 
-        /* Pe desktop, revenim la layout-ul cu două coloane */
-        @media (min-width: 769px) { /* Am schimbat de la 768px la 769px pentru a evita suprapuneri */
+        @media (min-width: 769px) {
             .page {
                 grid-template-columns: 1fr 360px;
             }
         }
-        /* Sfârșitul modificărilor - layout */
-
 
         .steps { display: flex; gap: 0; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
         .step { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--muted); flex: 1; }
@@ -84,23 +103,17 @@
         .card-value { font-size: 0.85rem; letter-spacing: 0.05em; }
         .card-brand { font-size: 1.5rem; opacity: 0.8; }
 
-        /* Ajustări pentru summary */
         .summary {
             background: #fff;
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 1.5rem;
-            /* Eliminăm sticky pe mobil, devine sticky doar pe desktop */
             position: static;
             top: unset;
         }
-        @media (min-width: 769px) { /* Păstrăm sticky doar pentru ecrane mai mari */
-            .summary {
-                position: sticky;
-                top: 84px;
-            }
+        @media (min-width: 769px) {
+            .summary { position: sticky; top: 84px; }
         }
-        /* Sfârșitul ajustărilor pentru summary */
 
         .summary h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 1.25rem; }
         .summary-items { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
@@ -132,81 +145,44 @@
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-family: 'Playfair Display', serif; font-style: italic; color: var(--muted); }
 
-        /* Au fost eliminate secțiunile @media duplicate și nefolositoare */
         @media (max-width: 768px) {
-            nav {
-                padding: 0 1rem;
-            }
+            nav { padding: 0 1rem; }
+            .brand { font-size: 1.1rem; }
+            .nav-user { display: none; } /* Ascunde numele ca să încapă butoanele pe mobil */
+            .nav-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
 
-            .brand {
-                font-size: 1.1rem; /* Ajustat din 1rem pentru o mai bună lizibilitate */
-            }
-
-            .page {
-                padding: 1.5rem 1rem; /* Reducem padding-ul pe mobil */
-                gap: 2rem; /* Ajustăm spațiul dintre secțiuni */
-            }
-
-            h2 {
-                font-size: 1.3rem; /* Ajustăm dimensiunea titlurilor */
-            }
-
-            .step {
-                font-size: 0.75rem; /* Ajustăm dimensiunea textului pentru pași */
-            }
-
-            .step-divider {
-                flex-basis: 1rem; /* Reducem lungimea divizorului */
-            }
-
-            .row2 {
-                grid-template-columns: 1fr; /* Câmpurile pe două coloane devin una singură pe mobil */
-            }
-
-            .card-visual {
-                height: 120px; /* Reducem înălțimea cardului vizual */
-                padding: 1rem;
-            }
-
-            .card-number-display {
-                font-size: 1rem;
-                letter-spacing: 0.15em;
-            }
-
-            .card-brand {
-                font-size: 1.3rem;
-            }
+            .page { padding: 1.5rem 1rem; gap: 2rem; }
+            h2 { font-size: 1.3rem; }
+            .step { font-size: 0.75rem; }
+            .step-divider { flex-basis: 1rem; }
+            .row2 { grid-template-columns: 1fr; }
+            .card-visual { height: 120px; padding: 1rem; }
+            .card-number-display { font-size: 1rem; letter-spacing: 0.15em; }
+            .card-brand { font-size: 1.3rem; }
         }
         @media (max-width: 480px) {
-            .pay-btn {
-                font-size: 0.9rem;
-                padding: 0.85rem;
-            }
-            .success-screen h1 {
-                font-size: 1.7rem;
-            }
-            .success-screen p {
-                font-size: 0.85rem;
-            }
-            .back-btn {
-                padding: 0.75rem 1.5rem;
-                font-size: 0.85rem;
-            }
-            /* Eliminat .nav-badge: display: none; deoarece nu exista un element .nav-badge */
+            .pay-btn { font-size: 0.9rem; padding: 0.85rem; }
+            .success-screen h1 { font-size: 1.7rem; }
+            .success-screen p { font-size: 0.85rem; }
+            .back-btn { padding: 0.75rem 1.5rem; font-size: 0.85rem; }
         }
 
-        /* Am eliminat HTML, body, layout duplicate. */
-        html, body {
-            width: 100%;
-            overflow-x: hidden;
-        }
-
+        html, body { width: 100%; overflow-x: hidden; }
     </style>
 </head>
 <body>
 
+<!-- Meniul complet adăugat -->
 <nav>
-    <a href="cart.html" class="brand">Libraria Belciug<span>.</span></a>
+    <a href="products.html" class="brand">Libraria Belciug<span>.</span></a>
+    <div class="nav-right">
+        <span class="nav-user" id="nav-user"></span>
+        <a href="cart.html" class="nav-btn btn-dark">
+            🛒 Coș <span class="cart-count" id="cart-count">0</span>
+        </a>
+        <a href="login.html" class="nav-btn btn-outline" id="auth-btn">Login</a>
+        <a href="admin.html" class="nav-btn btn-outline">Admin</a>
+    </div>
 </nav>
 
 <div class="loading-overlay" id="loading-overlay">
@@ -323,7 +299,14 @@
     const token = localStorage.getItem('token');
     let selectedMethod = 'card';
 
-    // Am scos redirecționarea forțată pentru a lăsa vizitatorii să comande
+    // Logica pentru meniu (Username + Logout)
+    const username = localStorage.getItem('username');
+    if (username) {
+        document.getElementById('nav-user').textContent = 'Salut, ' + username;
+        const authBtn = document.getElementById('auth-btn');
+        authBtn.textContent = 'Ieși';
+        authBtn.onclick = (e) => { e.preventDefault(); localStorage.clear(); location.reload(); };
+    }
 
     async function loadCart() {
         // 1. LOGICA PENTRU VIZITATORI (GUEST)
@@ -332,17 +315,18 @@
             if (!guestCart.length) { window.location.href = 'cart.html'; return; }
 
             try {
-                // Luăm lista de produse pentru a afla numele și prețul
                 const resProducts = await fetch('/api/products');
                 const allProducts = await resProducts.json();
 
                 let total = 0;
+                let count = 0;
                 let html = '';
 
                 guestCart.forEach(gItem => {
                     let p = allProducts.find(prod => prod.id === gItem.productId);
                     if (p) {
                         total += p.price * gItem.quantity;
+                        count += gItem.quantity; // Calculăm câte produse sunt în total
                         html += `
                         <div class="summary-item">
                             <span class="summary-item-name">${p.name}</span>
@@ -355,6 +339,7 @@
                 document.getElementById('summary-items').innerHTML = html;
                 document.getElementById('subtotal').textContent = total.toFixed(2) + ' RON';
                 document.getElementById('total-display').textContent = total.toFixed(2) + ' RON';
+                document.getElementById('cart-count').textContent = count; // Update bulină coș
             } catch(e) {
                 console.error("Eroare încărcare coș vizitator", e);
             }
@@ -372,6 +357,8 @@
             if (!items.length) { window.location.href = 'cart.html'; return; }
 
             const total = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
+            const count = items.reduce((s, i) => s + i.quantity, 0); // Calculăm produsele
+
             document.getElementById('summary-items').innerHTML = items.map(i => `
             <div class="summary-item">
                 <span class="summary-item-name">${i.product.name}</span>
@@ -382,6 +369,7 @@
 
             document.getElementById('subtotal').textContent = total.toFixed(2) + ' RON';
             document.getElementById('total-display').textContent = total.toFixed(2) + ' RON';
+            document.getElementById('cart-count').textContent = count; // Update bulină coș
         } catch(e) {
             console.error(e);
         }
@@ -467,7 +455,6 @@
         }
 
         try {
-            // Colectăm datele din formular
             const orderData = {
                 firstName: document.getElementById('fname').value,
                 lastName: document.getElementById('lname').value,
@@ -481,7 +468,6 @@
 
             let res;
             if (token) {
-                // Comandă Client Logat
                 res = await fetch('/api/orders/checkout', {
                     method: 'POST',
                     headers: {
@@ -491,7 +477,6 @@
                     body: JSON.stringify(orderData)
                 });
             } else {
-                // Comandă Vizitator (Atașăm și produsele din memorie)
                 orderData.items = JSON.parse(localStorage.getItem('guestCart')) || [];
                 res = await fetch('/api/orders/guest-checkout', {
                     method: 'POST',
@@ -503,7 +488,7 @@
             if (!res.ok) throw new Error();
             const order = await res.json();
 
-            // Golim coșul vizitatorului după succes
+            // Golim coșul vizitatorului
             if (!token) localStorage.removeItem('guestCart');
 
             overlay.classList.remove('show');
@@ -513,6 +498,9 @@
             document.getElementById('checkout-form').style.display = 'none';
             document.getElementById('order-summary').style.display = 'none';
             document.getElementById('success-screen').classList.add('show');
+
+            // Setăm bulina de coș la 0 pentru că am plasat comanda
+            document.getElementById('cart-count').textContent = '0';
 
             const methodNames = { card: 'Card bancar', ramburs: 'Ramburs la livrare', paypal: 'PayPal' };
             document.getElementById('success-details').innerHTML = `

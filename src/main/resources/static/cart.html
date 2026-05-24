@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibrariaBelciug — Coșul meu</title>
-    <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap)" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
@@ -30,6 +30,26 @@
         }
         .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; letter-spacing: -0.02em; text-decoration: none; color: var(--ink); }
         .brand span { color: var(--accent); font-style: italic; }
+
+        /* Adăugat CSS pentru meniu (Navbar) */
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-user { font-size: 0.85rem; color: var(--muted); }
+        .nav-btn {
+            padding: 0.5rem 1.1rem; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--ink); }
+        .btn-dark { background: var(--ink); color: #fff; border: none; position: relative; display: inline-flex; align-items: center; gap: 0.4rem; }
+        .btn-dark:hover { background: #2a2927; }
+        .cart-count {
+            background: var(--accent); color: #fff;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 0.65rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
 
         .page {
             max-width: 1000px; margin: 0 auto;
@@ -168,13 +188,10 @@
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
-            nav {
-                padding: 0 1rem;
-            }
-
-            .brand {
-                font-size: 1.1rem;
-            }
+            nav { padding: 0 1rem; }
+            .brand { font-size: 1.1rem; }
+            .nav-user { display: none; } /* Ascundem numele pe mobil ca să încapă butoanele */
+            .nav-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
 
             .page {
                 grid-template-columns: 1fr;
@@ -209,18 +226,9 @@
         }
 
         @media (max-width: 480px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .subtitle {
-                font-size: 0.85rem;
-            }
-
-            .checkout-btn {
-                font-size: 0.9rem;
-                padding: 0.8rem;
-            }
+            h1 { font-size: 1.8rem; }
+            .subtitle { font-size: 0.85rem; }
+            .checkout-btn { font-size: 0.9rem; padding: 0.8rem; }
         }
     </style>
 </head>
@@ -228,6 +236,14 @@
 
 <nav>
     <a href="products.html" class="brand">Libraria Belciug<span>.</span></a>
+    <div class="nav-right">
+        <span class="nav-user" id="nav-user"></span>
+        <a href="cart.html" class="nav-btn btn-dark">
+            🛒 Coș <span class="cart-count" id="cart-count">0</span>
+        </a>
+        <a href="login.html" class="nav-btn btn-outline" id="auth-btn">Login</a>
+        <a href="admin.html" class="nav-btn btn-outline">Admin</a>
+    </div>
 </nav>
 
 <div class="page">
@@ -257,7 +273,14 @@
     const COLORS = ['#8B4513','#2C5F2E','#1B3A6B','#6B2C5E','#4A4A4A','#8B6914','#2C4A6B','#6B3A2C','#8B3A3A','#2C6B5F'];
     const token = localStorage.getItem('token');
 
-    // Am șters linia cu redirect-ul ca să lăsăm vizitatorii să vadă pagina
+    // Logica pentru meniu (Username + Logout)
+    const username = localStorage.getItem('username');
+    if (username) {
+        document.getElementById('nav-user').textContent = 'Salut, ' + username;
+        const authBtn = document.getElementById('auth-btn');
+        authBtn.textContent = 'Ieși';
+        authBtn.onclick = (e) => { e.preventDefault(); localStorage.clear(); location.reload(); };
+    }
 
     function getColor(id) { return COLORS[id % COLORS.length]; }
 
@@ -267,17 +290,14 @@
             try {
                 let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
 
-                // Pentru că în localStorage avem doar ID-ul și Cantitatea,
-                // cerem lista de produse de la backend ca să aflăm numele și prețul
                 const resProducts = await fetch('/api/products');
                 const allProducts = await resProducts.json();
 
-                // Construim un obiect 'cart' fals care să arate exact cum îl trimite backend-ul
                 let cartItems = guestCart.map(gItem => {
                     let p = allProducts.find(prod => prod.id === gItem.productId);
                     if (!p) return null;
                     return {
-                        id: gItem.productId, // Folosim productId pe post de itemId
+                        id: gItem.productId,
                         product: p,
                         quantity: gItem.quantity
                     };
@@ -319,6 +339,7 @@
             document.getElementById('checkout-btn').disabled = true;
             document.getElementById('s-count').textContent = '0 produse';
             document.getElementById('s-total').textContent = '0.00 RON';
+            document.getElementById('cart-count').textContent = '0'; // Update Nav
             return;
         }
 
@@ -347,8 +368,10 @@
 
         const total = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
         const count = items.reduce((s, i) => s + i.quantity, 0);
+
         document.getElementById('s-count').textContent = count + ' produse';
         document.getElementById('s-total').textContent = total.toFixed(2) + ' RON';
+        document.getElementById('cart-count').textContent = count; // Aici se updatează bulina din Navbar!
         document.getElementById('checkout-btn').disabled = false;
     }
 
@@ -416,7 +439,6 @@
     }
 
     function checkout() {
-        // Indiferent dacă are token sau nu, merge direct la pagina de checkout
         window.location.href = 'checkout.html';
     }
 
