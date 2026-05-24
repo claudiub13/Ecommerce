@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibrariaBelciug — Contul Meu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --ink: #0f0e0d; --paper: #f7f4ef; --cream: #ede9e1;
+            --accent: #c8511a; --muted: #8a8278; --border: #d9d4cc;
+            --green: #2d6a2d; --green-bg: #f0f7f0;
+        }
+
+        html, body { width: 100%; overflow-x: hidden; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+        /* NAVBAR */
+        nav {
+            position: sticky; top: 0; z-index: 1000;
+            background: rgba(247,244,239,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 3rem;
+            display: flex; align-items: center;
+            justify-content: space-between; height: 64px;
+        }
+        .brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+        .brand span { color: var(--accent); font-style: italic; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-user { font-size: 0.85rem; color: var(--muted); }
+        .nav-btn {
+            padding: 0.5rem 1.1rem; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+            font-weight: 500; cursor: pointer; text-decoration: none;
+            transition: all 0.15s;
+        }
+        .btn-outline { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--ink); }
+        .btn-dark { background: var(--ink); color: #fff; border: none; position: relative; display: inline-flex; align-items: center; gap: 0.4rem; }
+        .btn-dark:hover { background: #2a2927; }
+        .cart-count {
+            background: var(--accent); color: #fff;
+            width: 18px; height: 18px; border-radius: 50%;
+            font-size: 0.65rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* LAYOUT PAGINĂ */
+        .page {
+            max-width: 1100px; margin: 0 auto;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 3rem; align-items: start;
+        }
+
+        /* SIDEBAR PROFIL */
+        .profile-sidebar {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: sticky; top: 84px;
+        }
+        .avatar {
+            width: 80px; height: 80px;
+            background: var(--ink); color: #fff;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; margin: 0 auto 1rem;
+        }
+        .profile-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem; margin-bottom: 0.25rem;
+        }
+        .profile-role {
+            font-size: 0.85rem; color: var(--muted);
+            margin-bottom: 2rem;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .logout-btn {
+            width: 100%; padding: 0.8rem;
+            background: transparent; color: var(--accent);
+            border: 1px solid var(--border); border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .logout-btn:hover { background: #fdf2ef; border-color: var(--accent); }
+
+        /* SECȚIUNE COMENZI */
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem; letter-spacing: -0.02em;
+            margin-bottom: 1.5rem;
+        }
+        .orders-container { display: flex; flex-direction: column; gap: 1.25rem; }
+
+        .order-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+        .order-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem; margin-bottom: 1rem;
+        }
+        .order-id { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+        .order-date { font-size: 0.85rem; color: var(--muted); }
+        .order-status {
+            padding: 0.3rem 0.8rem; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em;
+        }
+        .status-pending { background: #fff5e6; color: #c88a1a; border: 1px solid #f0d080; }
+        .status-completed { background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+
+        .order-items { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .order-item {
+            display: flex; justify-content: space-between;
+            font-size: 0.9rem; color: var(--ink);
+        }
+        .item-qty { color: var(--muted); font-size: 0.8rem; margin-right: 0.5rem; }
+
+        .order-footer {
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: 1rem; border-top: 1px dashed var(--border);
+        }
+        .order-total-label { font-size: 0.85rem; color: var(--muted); }
+        .order-total { font-size: 1.2rem; font-weight: 500; }
+
+        .empty-state {
+            text-align: center; padding: 4rem 2rem;
+            background: #fff; border: 1px dashed var(--border); border-radius: 10px;
+        }
+        .empty-state p { color: var(--muted); margin-bottom: 1.5rem; }
+        .empty-state a {
+            display: inline-block; padding: 0.75rem 1.5rem;
+            background: var(--ink); color: #fff;
+            text-decoration: none; border-radius: 6px; font-size: 0.9rem;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .page { grid-template-columns: 1fr; }
+            .profile-sidebar { position: static; display: flex; align-items: center; text-align: left; gap: 1.5rem; padding: 1.5rem; }
+            .avatar { margin: 0; flex-shrink: 0; }
+            .profile-info { flex: 1; }
+            .profile-role { margin-bottom: 0; }
+            .logout-btn { width: auto; }
+        }
+        @media (max-width: 768px) {
+            nav { padding: 0 1rem; }
+            .brand { font-size: 1.1rem; }
+            .nav-user { display: none; }
+            .nav-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+            .page { padding: 1.5rem 1rem; gap: 2rem; }
+            .order-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+            .status-wrapper { align-self: flex-start; margin-top: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="products.html" class="brand">Libraria Belciug<span>.</span></a>
+    <div class="nav-right">
+        <span class="nav-user" id="nav-user"></span>
+        <a href="cart.html" class="nav-btn btn-dark">
+            🛒 Coș <span class="cart-count" id="cart-count">0</span>
+        </a>
+        <a href="products.html" class="nav-btn btn-outline" id="auth-btn">Înapoi la cărți</a>
+    </div>
+</nav>
+
+<div class="page">
+    <div class="profile-sidebar">
+        <div class="avatar" id="avatar">U</div>
+        <div class="profile-info">
+            <div class="profile-name" id="profile-name">User</div>
+            <div class="profile-role">Client</div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Deconectare</button>
+    </div>
+
+    <div>
+        <h2>Istoric Comenzi</h2>
+        <div class="orders-container" id="orders-container">
+            <div style="color:var(--muted); font-size:0.9rem;">Se încarcă comenzile...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    const username = localStorage.getItem('username');
+
+    // Protejăm pagina - doar utilizatorii logați au acces
+    if (!token) {
+        window.location.href = 'login.html';
+    }
+
+    // Setăm datele utilizatorului în interfață
+    if (username) {
+        document.getElementById('nav-user').textContent = 'Salut, ' + username;
+        document.getElementById('profile-name').textContent = username;
+        document.getElementById('avatar').textContent = username.charAt(0).toUpperCase();
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+
+    // Formatăm data venită de la server (ex: "2026-05-25T14:30:00" -> "25/05/2026")
+    function formatDate(dateString) {
+        if (!dateString) return 'Dată necunoscută';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ro-RO', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute:'2-digit' });
+    }
+
+    // Traducem statusul comenzii pentru un aspect profesional
+    function formatStatus(status) {
+        if (status === 'PENDING') return '<span class="order-status status-pending">În procesare</span>';
+        if (status === 'COMPLETED') return '<span class="order-status status-completed">Finalizată</span>';
+        return `<span class="order-status status-pending">${status}</span>`;
+    }
+
+    async function loadOrders() {
+        try {
+            const res = await fetch('/api/orders', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (!res.ok) throw new Error('Nu am putut încărca comenzile');
+            const orders = await res.json();
+
+            const container = document.getElementById('orders-container');
+
+            if (!orders || orders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <p>Nu ai plasat nicio comandă până acum.</p>
+                        <a href="products.html">Descoperă cărțile noastre</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sortăm comenzile descrescător după ID (cele mai noi primele)
+            orders.sort((a, b) => b.id - a.id);
+
+            container.innerHTML = orders.map(order => `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">Comanda #${order.id}</div>
+                            <div class="order-date">${formatDate(order.createdAt)}</div>
+                        </div>
+                        <div class="status-wrapper">
+                            ${formatStatus(order.status)}
+                        </div>
+                    </div>
+                    <div class="order-items">
+                        ${(order.items || []).map(item => `
+                            <div class="order-item">
+                                <div><span class="item-qty">${item.quantity}x</span> ${item.product ? item.product.name : 'Produs necunoscut'}</div>
+                                <div>${(item.price * item.quantity).toFixed(2)} RON</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-footer">
+                        <span class="order-total-label">Total achitat</span>
+                        <span class="order-total">${order.totalPrice.toFixed(2)} RON</span>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch(e) {
+            document.getElementById('orders-container').innerHTML =
+                `<div style="color:var(--accent);">Eroare la încărcarea istoricului: ${e.message}</div>`;
+        }
+    }
+
+    async function updateNavbarCount() {
+        try {
+            const res = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
+            const cart = await res.json();
+            const count = (cart.items || []).reduce((s, i) => s + i.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+        } catch(e) {}
+    }
+
+    loadOrders();
+    updateNavbarCount();
+</script>
+</body>
+</html>

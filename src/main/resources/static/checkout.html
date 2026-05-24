@@ -172,11 +172,13 @@
 </head>
 <body>
 
-<!-- Meniul complet adăugat -->
 <nav>
     <a href="products.html" class="brand">Libraria Belciug<span>.</span></a>
     <div class="nav-right">
-        <span class="nav-user" id="nav-user"></span>
+        <a href="products.html" class="nav-btn btn-outline">Cărți</a>
+
+        <a href="account.html" class="nav-btn btn-outline" id="nav-user" style="display: none;">Contul meu</a>
+
         <a href="cart.html" class="nav-btn btn-dark">
             🛒 Coș <span class="cart-count" id="cart-count">0</span>
         </a>
@@ -302,7 +304,8 @@
     // Logica pentru meniu (Username + Logout)
     const username = localStorage.getItem('username');
     if (username) {
-        document.getElementById('nav-user').textContent = 'Salut, ' + username;
+        document.getElementById('nav-user').innerHTML = `<a href="account.html" style="color:var(--muted); text-decoration:none; font-weight:500;">Salut, ${username}</a>`;
+
         const authBtn = document.getElementById('auth-btn');
         authBtn.textContent = 'Ieși';
         authBtn.onclick = (e) => { e.preventDefault(); localStorage.clear(); location.reload(); };
