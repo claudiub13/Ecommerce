@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
@@ -16,30 +15,43 @@ public class CartController {
 
     private final CartService cartService;
 
+    private String resolveUsername(Principal principal) {
+        // dacă e logat → username real, altfel un username „guest”
+        if (principal != null) {
+            return principal.getName();
+        }
+        return "guest"; // sau "anon", cum vrei – vezi mai jos și în DB
+    }
+
     @GetMapping
     public ResponseEntity<Cart> getCart(Principal principal) {
-        return ResponseEntity.ok(cartService.getCart(principal.getName()));
+        String username = resolveUsername(principal);
+        return ResponseEntity.ok(cartService.getCart(username));
     }
 
     @PostMapping("/add/{productId}")
     public ResponseEntity<Cart> addToCart(@PathVariable Long productId,
                                           @RequestParam(defaultValue = "1") int quantity,
                                           Principal principal) {
-        return ResponseEntity.ok(cartService.addToCart(principal.getName(), productId, quantity));
+        String username = resolveUsername(principal);
+        return ResponseEntity.ok(cartService.addToCart(username, productId, quantity));
     }
 
     @DeleteMapping("/remove/{itemId}")
     public ResponseEntity<Cart> removeFromCart(@PathVariable Long itemId, Principal principal) {
-        return ResponseEntity.ok(cartService.removeFromCart(principal.getName(), itemId));
+        String username = resolveUsername(principal);
+        return ResponseEntity.ok(cartService.removeFromCart(username, itemId));
     }
 
     @GetMapping("/total")
     public ResponseEntity<Double> getTotal(Principal principal) {
-        return ResponseEntity.ok(cartService.calculateTotal(principal.getName()));
+        String username = resolveUsername(principal);
+        return ResponseEntity.ok(cartService.calculateTotal(username));
     }
 
     @PutMapping("/decrease/{itemId}")
     public ResponseEntity<Cart> decreaseQuantity(@PathVariable Long itemId, Principal principal) {
-        return ResponseEntity.ok(cartService.decreaseQuantity(principal.getName(), itemId));
+        String username = resolveUsername(principal);
+        return ResponseEntity.ok(cartService.decreaseQuantity(username, itemId));
     }
 }
