@@ -490,9 +490,29 @@
             document.body.style.overflow = '';
         }
     });
-
     async function addToCart(productId) {
-        if (!token) { showToast('Trebuie să fii logat!'); return; }
+        // 1. Logica pentru vizitatori (Nelogați)
+        if (!token) {
+            // Extragem coșul temporar din memorie sau creăm unul gol
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+
+            // Verificăm dacă produsul este deja în coșul temporar
+            let existingItem = guestCart.find(item => item.productId === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                guestCart.push({ productId: productId, quantity: 1 });
+            }
+
+            // Salvăm noul coș înapoi în browser
+            localStorage.setItem('guestCart', JSON.stringify(guestCart));
+
+            showToast('Carte adăugată în coș ✓ (Vizitator)');
+            updateCartCount();
+            return; // Ne oprim aici, NU apelăm backend-ul!
+        }
+
+        // 2. Logica pentru clienți (Logați)
         try {
             const res = await fetch(`/api/cart/add/${productId}?quantity=1`, {
                 method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
@@ -500,17 +520,29 @@
             if (!res.ok) throw new Error();
             showToast('Carte adăugată în coș ✓');
             updateCartCount();
-        } catch(e) { showToast('Eroare la adăugare'); }
+        } catch(e) {
+            showToast('Eroare la adăugare');
+        }
     }
 
     async function updateCartCount() {
-        if (!token) return;
+        // 1. Numărăm produsele din coșul temporar dacă nu e logat
+        if (!token) {
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+            const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').textContent = count;
+            return;
+        }
+
+        // 2. Numărăm produsele direct din baza de date dacă e logat
         try {
             const res = await fetch('/api/cart', { headers: { 'Authorization': 'Bearer ' + token } });
             const cart = await res.json();
             const count = (cart.items || []).reduce((s, i) => s + i.quantity, 0);
             document.getElementById('cart-count').textContent = count;
-        } catch(e) {}
+        } catch(e) {
+            console.error('Eroare la obținerea numărului de produse', e);
+        }
     }
 
     loadProducts();

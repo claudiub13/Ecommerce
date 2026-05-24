@@ -257,11 +257,40 @@
     const COLORS = ['#8B4513','#2C5F2E','#1B3A6B','#6B2C5E','#4A4A4A','#8B6914','#2C4A6B','#6B3A2C','#8B3A3A','#2C6B5F'];
     const token = localStorage.getItem('token');
 
-    if (!token) window.location.href = 'login.html';
+    // Am șters linia cu redirect-ul ca să lăsăm vizitatorii să vadă pagina
 
     function getColor(id) { return COLORS[id % COLORS.length]; }
 
     async function loadCart() {
+        // --- 1. Logica pentru vizitatori (Nelogați) ---
+        if (!token) {
+            try {
+                let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+
+                // Pentru că în localStorage avem doar ID-ul și Cantitatea,
+                // cerem lista de produse de la backend ca să aflăm numele și prețul
+                const resProducts = await fetch('/api/products');
+                const allProducts = await resProducts.json();
+
+                // Construim un obiect 'cart' fals care să arate exact cum îl trimite backend-ul
+                let cartItems = guestCart.map(gItem => {
+                    let p = allProducts.find(prod => prod.id === gItem.productId);
+                    if (!p) return null;
+                    return {
+                        id: gItem.productId, // Folosim productId pe post de itemId
+                        product: p,
+                        quantity: gItem.quantity
+                    };
+                }).filter(item => item !== null);
+
+                renderCart({ items: cartItems });
+            } catch(e) {
+                document.getElementById('cart-subtitle').textContent = 'Eroare la încărcare coș (vizitator).';
+            }
+            return;
+        }
+
+        // --- 2. Logica pentru clienți (Logați) ---
         try {
             const res = await fetch('/api/cart', {
                 headers: { 'Authorization': 'Bearer ' + token }
@@ -324,6 +353,14 @@
     }
 
     async function removeItem(itemId) {
+        if (!token) {
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+            guestCart = guestCart.filter(item => item.productId !== itemId);
+            localStorage.setItem('guestCart', JSON.stringify(guestCart));
+            loadCart();
+            return;
+        }
+
         try {
             await fetch(`/api/cart/remove/${itemId}`, {
                 method: 'DELETE',
@@ -334,6 +371,21 @@
     }
 
     async function decreaseItem(itemId) {
+        if (!token) {
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+            let item = guestCart.find(i => i.productId === itemId);
+            if (item) {
+                if (item.quantity > 1) {
+                    item.quantity -= 1;
+                } else {
+                    guestCart = guestCart.filter(i => i.productId !== itemId);
+                }
+                localStorage.setItem('guestCart', JSON.stringify(guestCart));
+            }
+            loadCart();
+            return;
+        }
+
         try {
             await fetch(`/api/cart/decrease/${itemId}`, {
                 method: 'PUT',
@@ -344,6 +396,16 @@
     }
 
     async function addOne(productId) {
+        if (!token) {
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+            let item = guestCart.find(i => i.productId === productId);
+            if (item) item.quantity += 1;
+            else guestCart.push({ productId: productId, quantity: 1 });
+            localStorage.setItem('guestCart', JSON.stringify(guestCart));
+            loadCart();
+            return;
+        }
+
         try {
             await fetch(`/api/cart/add/${productId}?quantity=1`, {
                 method: 'POST',
@@ -353,7 +415,12 @@
         } catch(e) {}
     }
 
-    async function checkout() {
+    function checkout() {
+        if (!token) {
+            alert('Te rugăm să te loghezi sau să îți creezi un cont pentru a finaliza comanda.');
+            window.location.href = 'login.html';
+            return;
+        }
         window.location.href = 'checkout.html';
     }
 
