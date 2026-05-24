@@ -416,11 +416,7 @@
     }
 
     function checkout() {
-        if (!token) {
-            alert('Te rugăm să te loghezi sau să îți creezi un cont pentru a finaliza comanda.');
-            window.location.href = 'login.html';
-            return;
-        }
+        // Indiferent dacă are token sau nu, merge direct la pagina de checkout
         window.location.href = 'checkout.html';
     }
 

@@ -321,11 +321,47 @@
 
 <script>
     const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'login.html';
-
     let selectedMethod = 'card';
 
+    // Am scos redirecționarea forțată pentru a lăsa vizitatorii să comande
+
     async function loadCart() {
+        // 1. LOGICA PENTRU VIZITATORI (GUEST)
+        if (!token) {
+            let guestCart = JSON.parse(localStorage.getItem('guestCart')) || [];
+            if (!guestCart.length) { window.location.href = 'cart.html'; return; }
+
+            try {
+                // Luăm lista de produse pentru a afla numele și prețul
+                const resProducts = await fetch('/api/products');
+                const allProducts = await resProducts.json();
+
+                let total = 0;
+                let html = '';
+
+                guestCart.forEach(gItem => {
+                    let p = allProducts.find(prod => prod.id === gItem.productId);
+                    if (p) {
+                        total += p.price * gItem.quantity;
+                        html += `
+                        <div class="summary-item">
+                            <span class="summary-item-name">${p.name}</span>
+                            <span class="summary-item-qty">x${gItem.quantity}</span>
+                            <span class="summary-item-price">${(p.price * gItem.quantity).toFixed(2)} RON</span>
+                        </div>`;
+                    }
+                });
+
+                document.getElementById('summary-items').innerHTML = html;
+                document.getElementById('subtotal').textContent = total.toFixed(2) + ' RON';
+                document.getElementById('total-display').textContent = total.toFixed(2) + ' RON';
+            } catch(e) {
+                console.error("Eroare încărcare coș vizitator", e);
+            }
+            return;
+        }
+
+        // 2. LOGICA PENTRU CLIENȚI LOGAȚI
         try {
             const res = await fetch('/api/cart', {
                 headers: { 'Authorization': 'Bearer ' + token }
@@ -342,10 +378,13 @@
                 <span class="summary-item-qty">x${i.quantity}</span>
                 <span class="summary-item-price">${(i.product.price * i.quantity).toFixed(2)} RON</span>
             </div>
-        `).join('');
+            `).join('');
+
             document.getElementById('subtotal').textContent = total.toFixed(2) + ' RON';
             document.getElementById('total-display').textContent = total.toFixed(2) + ' RON';
-        } catch(e) { console.error(e); }
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     function selectMethod(method, el) {
@@ -374,7 +413,6 @@
         input.value = val.replace(/(.{4})/g, '$1 ').trim();
         const display = val.padEnd(16, '•');
         document.getElementById('card-display').textContent = display.replace(/(.{4})/g, '$1 ').trim();
-        const icon = document.getElementById('card-icon');
         const brand = document.getElementById('card-brand');
         if (val.startsWith('4')) { brand.textContent = 'VISA'; }
         else if (val.startsWith('5')) { brand.textContent = 'MC'; }
@@ -429,20 +467,48 @@
         }
 
         try {
-            const res = await fetch('/api/orders/checkout', {
-                method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+            // Colectăm datele din formular
+            const orderData = {
+                firstName: document.getElementById('fname').value,
+                lastName: document.getElementById('lname').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                postalCode: document.getElementById('postal').value,
+                paymentMethod: selectedMethod
+            };
 
-            overlay.classList.remove('show');
+            let res;
+            if (token) {
+                // Comandă Client Logat
+                res = await fetch('/api/orders/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+            } else {
+                // Comandă Vizitator (Atașăm și produsele din memorie)
+                orderData.items = JSON.parse(localStorage.getItem('guestCart')) || [];
+                res = await fetch('/api/orders/guest-checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+            }
+
             if (!res.ok) throw new Error();
-
             const order = await res.json();
 
-            const fname = document.getElementById('fname').value;
-            const lname = document.getElementById('lname').value;
+            // Golim coșul vizitatorului după succes
+            if (!token) localStorage.removeItem('guestCart');
+
+            overlay.classList.remove('show');
+
             const total = document.getElementById('total-display').textContent;
-            const orderId = order.id;
 
             document.getElementById('checkout-form').style.display = 'none';
             document.getElementById('order-summary').style.display = 'none';
@@ -450,12 +516,12 @@
 
             const methodNames = { card: 'Card bancar', ramburs: 'Ramburs la livrare', paypal: 'PayPal' };
             document.getElementById('success-details').innerHTML = `
-            <div class="success-row"><span>Număr comandă</span><span>#${orderId}</span></div>
-            <div class="success-row"><span>Nume</span><span>${fname} ${lname}</span></div>
+            <div class="success-row"><span>Număr comandă</span><span>#${order.id || 'N/A'}</span></div>
+            <div class="success-row"><span>Nume</span><span>${orderData.firstName} ${orderData.lastName}</span></div>
             <div class="success-row"><span>Total plătit</span><span>${total}</span></div>
             <div class="success-row"><span>Metodă plată</span><span>${methodNames[selectedMethod]}</span></div>
             <div class="success-row"><span>Livrare estimată</span><span>2-4 zile lucrătoare</span></div>
-        `;
+            `;
 
         } catch(e) {
             overlay.classList.remove('show');
