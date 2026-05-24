@@ -17,7 +17,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    private final String ADMIN_EMAIL = "claudiu@admin.com";
+    private final String ADMIN_EMAIL = "admin";
 
     @GetMapping
     public ResponseEntity<List<Product>> getAll() {
