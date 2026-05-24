@@ -2,25 +2,27 @@ package com.example.ecommerce.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore; // 1. ASIGURĂ-TE CĂ AI ACEST IMPORT
 
 @Entity
-@Table(name = "order_items")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @JsonIgnore // 2. ADAUGĂ ACEASTĂ LINIE AICI (Foarte Important!)
     private Order order;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 
-    private Integer quantity;
-    private Double price;
+    private int quantity;
+    private double price;
 }

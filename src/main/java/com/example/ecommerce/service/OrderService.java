@@ -50,12 +50,15 @@ public class OrderService {
         order.setTotalPrice(total);
         Order savedOrder = orderRepository.save(order);
 
-        // golim coșul
-        cartItemRepository.deleteAll(cart.getItems());
+        // GOLIREA COȘULUI (Modifică aceste linii):
+        cartItemRepository.deleteAll(cart.getItems()); // Ștergem rândurile din baza de date
+        cart.getItems().clear();                       // Golim lista din obiectul Cart din memorie
+        cartRepository.save(cart);                     // Salvăm coșul gol
 
         return savedOrder;
     }
 
+    @Transactional
     public List<Order> getUserOrders(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User negăsit"));
