@@ -491,17 +491,29 @@
         }
     });
 
+    const token = localStorage.getItem('token');
+
     async function addToCart(productId) {
-        if (!token) { showToast('Trebuie să fii logat!'); return; }
         try {
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;  // dacă e logat, trimitem token
+            }
+
             const res = await fetch(`/api/cart/add/${productId}?quantity=1`, {
-                method: 'POST', headers: { 'Authorization': 'Bearer ' + token }
+                method: 'POST',
+                headers
             });
+
             if (!res.ok) throw new Error();
+
             showToast('Carte adăugată în coș ✓');
             updateCartCount();
-        } catch(e) { showToast('Eroare la adăugare'); }
+        } catch (e) {
+            showToast('Eroare la adăugare');
+        }
     }
+
 
     async function updateCartCount() {
         if (!token) return;
